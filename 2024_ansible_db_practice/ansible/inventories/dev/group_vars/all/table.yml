@@ -1,0 +1,19 @@
+table:
+  tb_lemon1:
+    name: sc_lemon.tb_lemon1
+    db: project1_db
+    columns:
+      - id SERIAL PRIMARY KEY
+      - description VARCHAR(255)
+  tb_grape1:
+    name: sc_grape.tb_grape1
+    db: project1_db
+    columns:
+      - id SERIAL PRIMARY KEY
+      - value INTEGER
+  tb_grape2:
+    name: sc_grape.tb_grape1
+    db: project1_db
+    columns:
+      - id SERIAL PRIMARY KEY
+      - value INTEGER

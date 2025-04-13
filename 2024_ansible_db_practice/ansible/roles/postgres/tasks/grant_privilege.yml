@@ -1,0 +1,34 @@
+- name: Grant privileges
+  community.postgresql.postgresql_privs:
+    db: "{{ priv_item.db }}"
+
+    # User to grant privileges
+    role: "{{ priv_item.role | default(omit) }}"
+    roles: "{{ priv_item.roles | default(omit) }}"
+
+    # Grant type (database, schema, table, role)
+    type: "{{ priv_item.type }}"
+
+    # Object(s) to grant (database, schema, table)
+    objs: "{{ priv_item.objs | default(omit) }}"
+    obj: "{{ priv_item.obj | default(omit) }}"
+
+    schema: "{{ priv_item.schema | default(omit) }}"
+
+    # Privilege list
+    privs: "{{ priv_item.privs }}"
+    grant_option: "{{ priv_item.grant_option | default(omit) }}"
+
+    state: "{{ priv_item.state | default('present') }}"
+
+    target_roles: "{{ priv_item.target_roles | default(omit) }}"
+    session_role: "{{ priv_item.session_roles | default(omit) }}"
+
+    login_host: "{{ db[priv_item.db].login_host }}"
+    login_port: "{{ db[priv_item.db].login_port }}"
+    login_user: "{{ db[priv_item.db].login_user }}"
+    login_password: "{{ db[priv_item.db].login_password }}"
+
+  loop: "{{ priv }}"
+  loop_control:
+    loop_var: priv_item

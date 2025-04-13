@@ -1,0 +1,26 @@
+apiVersion: karpenter.k8s.aws/v1alpha5
+kind: Provisioner
+namespace: karpenter
+metadata:
+  name: low-cost-provisioner
+spec:
+  requirements:
+    - key: "node.kubernetes.io/instance-type"
+      operator: In
+      values: ["t3.micro"]
+    - key: "topology.kubernetes.io/zone"
+      operator: In
+      values: ["ap-northeast-2a"]
+  limits:
+    resources:
+      cpu: "10"
+      memory: "10Gi"
+  provider:
+    subnetSelector:
+      karpenter.sh/discovery: "karpenter-demo"
+    securityGroupSelector:
+      karpenter.sh/discovery: "karpenter-demo"
+  ttlSecondsAfterEmpty: Never
+  consolidation:
+    enabled: false
+

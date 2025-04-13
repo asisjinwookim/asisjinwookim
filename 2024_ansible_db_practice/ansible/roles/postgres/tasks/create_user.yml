@@ -1,0 +1,13 @@
+- name: Create users
+  community.postgresql.postgresql_user:
+    name: "{{ item.value.name }}"
+    password: "{{ item.value.password }}"
+    db: "{{ item.value.db }}"
+    login_host: "{{ db[item.value.db].login_host }}"
+    login_port: "{{ db[item.value.db].login_port }}"
+    login_user: "{{ db[item.value.db].login_user }}"
+    login_password: "{{ db[item.value.db].login_password }}"
+    state: present
+  loop: "{{ user | dict2items }}"
+  loop_control:
+    loop_var: item

@@ -1,0 +1,9 @@
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::851725257232:role/eks-test"
+
+settings:
+  clusterName: karpenter-drift-eks
+  clusterEndpoint: "https://D0C2041D09D57B0A498D1779F08B562E.gr7.ap-northeast-2.eks.amazonaws.com"
+  interruptionQueue: karpenter-drift-eks
+
