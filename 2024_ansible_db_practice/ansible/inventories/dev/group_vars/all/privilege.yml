@@ -1,0 +1,36 @@
+priv:
+  - db: project1_db # DB that the task will be performed on
+    type: database
+    roles: prj1_user_write # User to be granted the privilege
+    objs: project1_db # DB that the privilege will be granted on
+    privs: CONNECT # CONNECT | ALL
+
+  - db: project1_db
+    type: schema
+    objs: sc_lemon
+    role: prj1_user_write
+    privs: USAGE # USAGE | CREATE
+
+  - db: project1_db
+    type: table
+    schema: sc_lemon
+    objs: ALL_IN_SCHEMA # ALL tables in the schema
+    roles: prj1_user_write
+    privs: SELECT,INSERT
+    grant_option: true
+
+    db: project1_db
+    type: default_privs
+    schema: sc_lemon
+    target_roles: prj1_user_write
+    roles: prj1_user_readonly
+    objs: TABLES
+    privs: SELECT
+
+  # - db: project1_db
+  #   type: table
+  #   schema: sc_lemon
+  #   objs: ALL_IN_SCHEMA # ALL tables in the schema
+  #   roles: prj1_user_write
+  #   privs: SELECT,INSERT
+  #   state: absent # Remove the privilege

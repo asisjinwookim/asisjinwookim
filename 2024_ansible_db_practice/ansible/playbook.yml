@@ -1,0 +1,5 @@
+- name: Setup PostgreSQL in Docker
+  hosts: localhost # Run ansible in localhost (not remote)
+  gather_facts: true
+  roles:
+    - postgres

@@ -1,0 +1,11 @@
+- name: Create databases
+  community.postgresql.postgresql_db:
+    name: "{{ item.key }}"
+    login_host: "{{ item.value.login_host }}"
+    login_port: "{{ item.value.login_port }}"
+    login_user: "{{ item.value.login_user }}"
+    login_password: "{{ item.value.login_password }}"
+    state: present
+  loop: "{{ db | dict2items }}"
+  loop_control:
+    loop_var: item

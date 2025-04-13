@@ -1,0 +1,5 @@
+- include_tasks: create_database.yml
+- include_tasks: create_user.yml
+- include_tasks: create_schema.yml
+- include_tasks: create_table.yml
+- include_tasks: grant_privilege.yml

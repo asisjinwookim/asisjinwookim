@@ -1,0 +1,12 @@
+- name: Create schemas
+  community.postgresql.postgresql_schema:
+    name: "{{ item.value.name }}"
+    db: "{{ item.value.db }}"
+    login_host: "{{ db[item.value.db].login_host }}"
+    login_port: "{{ db[item.value.db].login_port }}"
+    login_user: "{{ db[item.value.db].login_user }}"
+    login_password: "{{ db[item.value.db].login_password }}"
+    state: present
+  loop: "{{ schema | dict2items }}"
+  loop_control:
+    loop_var: item

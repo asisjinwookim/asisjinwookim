@@ -1,0 +1,13 @@
+- name: Create tables in specified schemas with owners
+  community.postgresql.postgresql_table:
+    db: "{{ item.value.db }}"
+    name: "{{ item.value.name }}"
+    columns: "{{ item.value.columns }}"
+    login_host: "{{ db[item.value.db].login_host }}"
+    login_port: "{{ db[item.value.db].login_port }}"
+    login_user: "{{ db[item.value.db].login_user }}"
+    login_password: "{{ db[item.value.db].login_password }}"
+    state: present
+  loop: "{{ table | dict2items }}"
+  loop_control:
+    loop_var: item

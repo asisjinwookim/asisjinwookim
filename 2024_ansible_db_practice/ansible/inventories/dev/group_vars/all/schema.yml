@@ -1,0 +1,7 @@
+schema:
+  sc_lemon:
+    name: sc_lemon
+    db: project1_db
+  sc_grape:
+    name: sc_grape
+    db: project1_db

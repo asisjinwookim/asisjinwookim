@@ -1,0 +1,9 @@
+user:
+  prj1_user_write:
+    name: prj1_user_write
+    password: password
+    db: project1_db
+  prj1_user_readonly:
+    name: prj1_user_readonly
+    password: password
+    db: project1_db
