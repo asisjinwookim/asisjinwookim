@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Train Model</title>
+</head>
+<body>
+    <h1>Train Your ML Model</h1>
+    <p>Select the dataset, feature, and model configuration, then click the button below to start training.</p>
+
+    {% if error %}
+        <p style="color: red;">Error: {{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="dataset_config">Choose Dataset Configuration:</label>
+        <select name="dataset_config" id="dataset_config" required>
+            <option value="">-- Select a Dataset --</option>
+            {% for config in dataset_configs %}
+                <option value="{{ config.id }}">{{ config.name }} (File: {{ config.file_path }}, Target: {{ config.target_column }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="feature_config">Choose Feature Configuration:</label>
+        <select name="feature_config" id="feature_config" required>
+            <option value="">-- Select a Feature Set --</option>
+            {% for config in feature_configs %}
+                <option value="{{ config.id }}">{{ config.name }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="model_config">Choose Model Configuration:</label>
+        <select name="model_config" id="model_config" required>
+            <option value="">-- Select a Model --</option>
+            {% for config in model_configs %}
+                <option value="{{ config.id }}">{{ config.name }} (Type: {{ config.model_type }}, Dataset: {{ config.dataset_config.name }}, Features: {{ config.feature_config.name }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <button type="submit">Start Training</button>
+    </form>
+
+    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compare Model Results</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #f2f2f2; }
+        .metrics-table { margin-top: 10px; width: auto; font-size: 0.9em; }
+        .metrics-table th, .metrics-table td { padding: 4px; }
+        .checkbox-list label { display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Compare Model Results</h1>
+
+    {% if has_results_to_compare %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="checkbox-list">
+                {{ form.results_to_compare }}
+            </div>
+            <br>
+            <button type="submit">Compare Selected Results</button>
+        </form>
+    {% else %}
+        <p>No enough model training results available for comparison. Please train at least two models first.</p>
+    {% endif %}
+
+    {% if selected_results %}
+        <h2>Comparison Overview</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Run ID</th>
+                    <th>Timestamp</th>
+                    <th>Dataset</th>
+                    <th>Features</th>
+                    <th>Model</th>
+                    <th>Type</th>
+                    <th>Metrics</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in selected_results %}
+                    <tr>
+                        <td><code>{{ result.run_id }}</code></td>
+                        <td>{{ result.timestamp }}</td>
+                        <td>{{ result.dataset_name }}</td>
+                        <td>{{ result.feature_name }}</td>
+                        <td>{{ result.model_name }}</td>
+                        <td>{{ result.model_type }}</td>
+                        <td>
+                            {% if result.model_type == 'LogisticRegression' or result.model_type == 'RandomForestClassifier' %}
+                                <p><strong>Accuracy:</strong> {{ result.evaluation_results.accuracy|floatformat:4 }}</p>
+                                <p><strong>Report:</strong> <button onclick="alert(JSON.stringify({{ result.evaluation_results.classification_report|safe }}, null, 2))">View Details</button></p>
+                            {% elif result.model_type == 'LinearRegression' or result.model_type == 'RandomForestRegressor' %}
+                                <p><strong>MSE:</strong> {{ result.evaluation_results.mse|floatformat:4 }}</p>
+                                <p><strong>R2 Score:</strong> {{ result.evaluation_results.r2_score|floatformat:4 }}</p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif request.method == 'POST' %}
+        <p>No results selected or found for comparison.</p>
+    {% endif %}
+
+    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
+</body>
+</html>

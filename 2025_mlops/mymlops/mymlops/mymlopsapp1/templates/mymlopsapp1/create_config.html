@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create {{ config_type }} Configuration</title>
+</head>
+<body>
+    <h1>Create {{ config_type }} Configuration</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create</button>
+    </form>
+
+    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
+    {% if config_type == 'Dataset' %}
+        <p><a href="{% url 'mymlopsapp1:list_dataset_configs' %}">Back to Dataset List</a></p>
+    {% elif config_type == 'Feature' %}
+        <p><a href="{% url 'mymlopsapp1:list_feature_configs' %}">Back to Feature List</a></p>
+    {% elif config_type == 'Model' %}
+        <p><a href="{% url 'mymlopsapp1:list_model_configs' %}">Back to Model List</a></p>
+    {% endif %}
+</body>
+</html>

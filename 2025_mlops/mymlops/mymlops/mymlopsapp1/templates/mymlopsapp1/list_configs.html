@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ config_type }} Configurations</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>{{ config_type }} Configurations</h1>
+    <p><a href="{% url create_url_name %}">Create New {{ config_type }} Configuration</a></p>
+
+    {% if configs %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    {% if config_type == 'Dataset' %}
+                        <th>File Path</th>
+                        <th>Target Column</th>
+                    {% elif config_type == 'Feature' %}
+                        <th>Features</th>
+                    {% elif config_type == 'Model' %}
+                        <th>Dataset</th>
+                        <th>Features</th>
+                        <th>Model Type</th>
+                        <th>Parameters</th>
+                    {% endif %}
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for config in configs %}
+                    <tr>
+                        <td>{{ config.name }}</td>
+                        {% if config_type == 'Dataset' %}
+                            <td>{{ config.file_path }}</td>
+                            <td>{{ config.target_column }}</td>
+                        {% elif config_type == 'Feature' %}
+                            <td><code>{{ config.features|json_script:"features_data"|safe }}</code> <button onclick="alert(document.getElementById('features_data').textContent)">View</button></td>
+                        {% elif config_type == 'Model' %}
+                            <td>{{ config.dataset_config.name }}</td>
+                            <td>{{ config.feature_config.name }}</td>
+                            <td>{{ config.model_type }}</td>
+                            <td><code>{{ config.parameters|json_script:"params_data"|safe }}</code> <button onclick="alert(document.getElementById('params_data').textContent)">View</button></td>
+                        {% endif %}
+                        <td>{{ config.description|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No {{ config_type }} configurations found. Please create one.</p>
+    {% endif %}
+
+    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
+</body>
+</html>

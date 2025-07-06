@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Model Training Results</title>
+</head>
+<body>
+    <h1>Model Training Results</h1>
+
+    {% if evaluation_results %}
+        <p><strong>Model Trained Successfully!</strong></p>
+        <p>Run ID: <code>{{ run_id }}</code></p> {# 추가된 정보 #}
+        <p>Timestamp: {{ timestamp }}</p> {# 추가된 정보 #}
+        <p>Model Name: <strong>{{ model_name }}</strong></p>
+        <p>Dataset Name: <strong>{{ dataset_name }}</strong></p>
+        <p>Feature Set: <strong>{{ feature_name }}</strong></p>
+        <p>Model Type: <strong>{{ model_type }}</strong></p>
+
+        {% if model_type == 'LogisticRegression' or model_type == 'RandomForestClassifier' %}
+            <h2>Classification Metrics:</h2>
+            <p>Accuracy: {{ evaluation_results.accuracy|floatformat:4 }}</p>
+
+            <h3>Classification Report:</h3>
+            <pre id="classification_report_data" style="display:none;">{{ evaluation_results.classification_report|json_script:"classification_report_data" }}</pre>
+            <div id="report-output"></div>
+            <script>
+                // ... (기존 JavaScript 코드 유지) ...
+            </script>
+
+        {% elif model_type == 'LinearRegression' or model_type == 'RandomForestRegressor' %}
+            <h2>Regression Metrics:</h2>
+            <p>Mean Squared Error (MSE): {{ evaluation_results.mse|floatformat:4 }}</p>
+            <p>R-squared (R2) Score: {{ evaluation_results.r2_score|floatformat:4 }}</p>
+        {% endif %}
+
+        <p>Model saved as: <code>{{ model_filename }}</code></p>
+    {% else %}
+        <p>No model training results found. Please train a model first.</p>
+    {% endif %}
+
+    <p><a href="{% url 'mymlopsapp1:train_model' %}">Train Another Model</a></p>
+    <p><a href="{% url 'mymlopsapp1:compare_results' %}">**Compare All Results**</a></p> {# NEW LINK #}
+    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
+</body>
+</html>
