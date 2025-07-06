@@ -1,0 +1,21 @@
+# .gitignore
+# DVC
+.dvc/cache/
+data/*.csv
+data/*.tsv
+data/*.json
+
+# Model artifacts
+model/
+*.pkl
+*.bin
+
+# MLflow
+mlruns/
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+.env
+venv/
