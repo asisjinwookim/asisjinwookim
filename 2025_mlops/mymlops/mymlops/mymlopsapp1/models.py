@@ -6,16 +6,16 @@ from django.utils import timezone
 # )  # PostgreSQL을 사용할 경우, 다른 DB는 JSONField 고려
 
 
-# --- FeatureConfig 모델 추가 ---
 class FeatureConfig(models.Model):
     name = models.CharField(
         max_length=100,
         unique=True,
         help_text="피처 설정의 고유 이름 (예: WineFeatures_All)",
     )
-    features = models.JSONField(
-        help_text="학습에 사용할 피처 리스트 (JSON 배열)", default=list
-    )
+    # JSONField -> TextField로 변경
+    features = models.TextField(
+        help_text="학습에 사용할 피처 리스트 (JSON 배열 형식의 문자열)", default="[]"
+    )  # 기본값을 빈 JSON 배열 문자열로
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -28,7 +28,6 @@ class FeatureConfig(models.Model):
         verbose_name_plural = "피처 설정"
 
 
-# --- DatasetConfig 모델 수정: FeatureConfig 참조 ---
 class DatasetConfig(models.Model):
     name = models.CharField(
         max_length=100,
@@ -51,14 +50,12 @@ class DatasetConfig(models.Model):
         verbose_name_plural = "데이터셋 설정"
 
 
-# --- ModelConfig 모델 수정: FeatureConfig 참조 및 데이터셋과의 연결 유지 ---
 class ModelConfig(models.Model):
     name = models.CharField(
         max_length=100,
         unique=True,
         help_text="모델 설정의 고유 이름 (예: WineQuality_LogisticRegression)",
     )
-    # DatasetConfig와 FeatureConfig를 각각 참조
     dataset_config = models.ForeignKey(
         DatasetConfig, on_delete=models.CASCADE, help_text="이 모델이 사용할 데이터셋"
     )
@@ -69,8 +66,9 @@ class ModelConfig(models.Model):
         max_length=50,
         help_text="사용할 모델 타입 (예: LogisticRegression, RandomForest)",
     )
-    parameters = models.JSONField(
-        help_text="모델 하이퍼파라미터 (JSON 객체)", default=dict
+    # JSONField -> TextField로 변경 (필요하다면)
+    parameters = models.TextField(
+        help_text="모델 하이퍼파라미터 (JSON 객체 형식의 문자열)", default="{}"
     )
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -82,8 +80,6 @@ class ModelConfig(models.Model):
     class Meta:
         verbose_name = "모델 설정"
         verbose_name_plural = "모델 설정"
-        # dataset_config와 feature_config 조합에 대한 unique constraint 추가 가능
-        # unique_together = ('dataset_config', 'feature_config', 'name')
 
 
 class Dataset(models.Model):

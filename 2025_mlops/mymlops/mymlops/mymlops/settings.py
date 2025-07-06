@@ -124,7 +124,7 @@ USE_TZ = True
 
 # STATIC_URL = "static/"
 # 1. STATIC_URL: 웹에서 정적 파일에 접근할 때 사용할 URL 접두사
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 
 # 2. STATICFILES_DIRS: 개발 중 앱 고유의 정적 파일 외에 프로젝트 전체에서
 #    사용할 정적 파일(예: 공통 CSS, JS)이 위치한 디렉토리를 Django가 찾을 경로 목록

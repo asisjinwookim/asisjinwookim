@@ -1,60 +1,71 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ config_type }} Configurations</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
-</head>
-<body>
-    <h1>{{ config_type }} Configurations</h1>
-    <p><a href="{% url create_url_name %}">Create New {{ config_type }} Configuration</a></p>
+{% extends 'base.html' %}
+
+{% block title %}{{ config_type }} 구성 목록{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{{ config_type }} 구성 목록</h1>
+    <div class="mb-3">
+        <a href="{% url create_url_name %}" class="btn btn-success me-2">새 {{ config_type }} 구성 생성</a>
+        {% if config_type == 'Dataset' %}
+            <a href="{% url 'mymlopsapp1:dataset_upload' %}" class="btn btn-info">새 데이터셋 파일 업로드</a>
+        {% endif %}
+    </div>
 
     {% if configs %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    {% if config_type == 'Dataset' %}
-                        <th>File Path</th>
-                        <th>Target Column</th>
-                    {% elif config_type == 'Feature' %}
-                        <th>Features</th>
-                    {% elif config_type == 'Model' %}
-                        <th>Dataset</th>
-                        <th>Features</th>
-                        <th>Model Type</th>
-                        <th>Parameters</th>
-                    {% endif %}
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for config in configs %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm bg-white rounded">
+                <thead class="table-dark">
                     <tr>
-                        <td>{{ config.name }}</td>
+                        <th>이름</th>
                         {% if config_type == 'Dataset' %}
-                            <td>{{ config.file_path }}</td>
-                            <td>{{ config.target_column }}</td>
+                            <th>파일 경로</th>
+                            <th>타겟 컬럼</th>
                         {% elif config_type == 'Feature' %}
-                            <td><code>{{ config.features|json_script:"features_data"|safe }}</code> <button onclick="alert(document.getElementById('features_data').textContent)">View</button></td>
+                            <th>피처 목록</th>
                         {% elif config_type == 'Model' %}
-                            <td>{{ config.dataset_config.name }}</td>
-                            <td>{{ config.feature_config.name }}</td>
-                            <td>{{ config.model_type }}</td>
-                            <td><code>{{ config.parameters|json_script:"params_data"|safe }}</code> <button onclick="alert(document.getElementById('params_data').textContent)">View</button></td>
+                            <th>데이터셋</th>
+                            <th>피처 셋</th>
+                            <th>모델 타입</th>
+                            <th>파라미터</th>
                         {% endif %}
-                        <td>{{ config.description|default:"-" }}</td>
+                        <th>설명</th>
+                        {# <th>생성일</th> #}
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for config in configs %}
+                        <tr>
+                            <td>{{ config.name }}</td>
+                            {% if config_type == 'Dataset' %}
+                                <td>{{ config.file_path }}</td>
+                                <td>{{ config.target_column }}</td>
+                            {% elif config_type == 'Feature' %}
+                                <td>
+                                    {# JSON 데이터는 alert 대신 모달 등으로 더 보기 좋게 만들 수 있음 #}
+                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('{{ config.features|escapejs }}')">보기</button>
+                                </td>
+                            {% elif config_type == 'Model' %}
+                                <td>{{ config.dataset_config.name }}</td>
+                                <td>{{ config.feature_config.name }}</td>
+                                <td>{{ config.model_type }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('{{ config.parameters|escapejs }}')">보기</button>
+                                </td>
+                            {% endif %}
+                            <td>{{ config.description|default:"-" }}</td>
+                            {# <td>{{ config.created_at|date:"Y-m-d H:i" }}</td> #}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No {{ config_type }} configurations found. Please create one.</p>
+        <div class="alert alert-info" role="alert">
+            등록된 {{ config_type }} 구성이 없습니다.
+        </div>
     {% endif %}
 
-    <p><a href="{% url 'mymlopsapp1:home' %}">Back to Home</a></p>
-</body>
-</html>
+    <div class="mt-4">
+        <a href="{% url 'mymlopsapp1:home' %}" class="btn btn-outline-secondary">홈으로</a>
+    </div>
+{% endblock %}

@@ -21,7 +21,7 @@ from sklearn.metrics import (
 )
 import joblib
 
-# import json  # json 모듈 임포트
+import json  # json 모듈 임포트
 
 # 폼 임포트
 from .forms import DatasetConfigForm, FeatureConfigForm, ModelConfigForm
@@ -32,6 +32,60 @@ DATA_ROOT = os.path.join(settings.BASE_DIR, "data")
 # 모델 저장 경로 (settings.MEDIA_ROOT 사용)
 MODEL_DIR = os.path.join(settings.MEDIA_ROOT, "models")
 os.makedirs(MODEL_DIR, exist_ok=True)  # 모델 디렉토리 생성
+
+
+# --- 데이터셋 업로드 및 설정 폼 (단일 단계) ---
+class DatasetUploadAndConfigForm(forms.Form):
+    file = forms.FileField(
+        label="CSV 파일 선택", help_text="업로드할 데이터셋 CSV 파일을 선택하세요."
+    )
+    dataset_name = forms.CharField(
+        max_length=100,
+        label="데이터셋 이름",
+        help_text="데이터셋의 고유한 이름을 입력하세요 (예: WineQualityRed_New).",
+    )
+    # target_column = forms.CharField(
+    #     max_length=100,
+    #     label="타겟 컬럼 이름",
+    #     help_text="예측하거나 분류할 타겟 변수의 정확한 컬럼 이름을 입력하세요.",
+    # )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
+        label="설명",
+        help_text="데이터셋에 대한 간단한 설명을 입력하세요.",
+    )
+
+
+# --- 임시 파일 업로드 폼 (초기 파일 업로드) ---
+class InitialUploadFileForm(forms.Form):
+    file = forms.FileField(
+        label="CSV 파일 선택", help_text="업로드할 데이터셋 CSV 파일을 선택하세요."
+    )
+    dataset_name = forms.CharField(
+        max_length=100,
+        label="데이터셋 이름",
+        help_text="데이터셋의 고유한 이름을 입력하세요 (예: WineQualityRed_New).",
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
+        label="설명",
+        help_text="데이터셋에 대한 간단한 설명을 입력하세요.",
+    )
+
+
+# --- 타겟 컬럼 선택 폼 (컬럼 목록 동적 생성) ---
+class SelectTargetColumnForm(forms.Form):
+    # 이 필드는 뷰에서 동적으로 choices를 채울 것입니다.
+    target_column = forms.ChoiceField(
+        label="타겟 컬럼 선택",
+        help_text="예측하거나 분류할 타겟 변수 컬럼을 선택하세요.",
+    )
+    # dataset_name, description은 hidden 필드로 전달받아 DatasetConfig 생성에 사용
+    dataset_name = forms.CharField(widget=forms.HiddenInput())
+    uploaded_filename = forms.CharField(widget=forms.HiddenInput())
+    description = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 # --- File Upload Form (Define this directly in views.py or in forms.py) ---
@@ -201,7 +255,7 @@ def train_model_view(request):
             df = pd.read_csv(dataset_full_path)
             print(f"Dataset loaded from local file: {dataset_full_path}")
 
-            features = selected_feature_config.features  # FeatureConfig에서 피처 로드
+            features = json.loads(selected_feature_config.features)
             target_column = (
                 selected_dataset_config.target_column
             )  # DatasetConfig에서 타겟 컬럼 로드
@@ -426,64 +480,113 @@ def compare_results_view(request):
     return render(request, "mymlopsapp1/compare_results.html", context)
 
 
-# --- New: Dataset Upload View ---
 def dataset_upload_view(request):
     if request.method == "POST":
-        form = UploadFileForm(request.POST, request.FILES)
+        form = DatasetUploadAndConfigForm(request.POST, request.FILES)
+        print("\n--- Form Submitted (POST Request) ---")
+
         if form.is_valid():
+            print("--- Form is VALID ---")
             uploaded_file = form.cleaned_data["file"]
             dataset_name = form.cleaned_data["dataset_name"]
-            target_column = form.cleaned_data["target_column"]
             description = form.cleaned_data["description"]
 
-            # Save the uploaded file to the DATA_ROOT directory
-            # We use default_storage for consistency, though direct os.path.join + open() would also work.
-            # default_storage uses MEDIA_ROOT by default. If you want DATA_ROOT, you might
-            # need to configure a custom storage backend or save manually.
-            # For this example, let's explicitly save it to DATA_ROOT.
-            file_path = os.path.join(DATA_ROOT, uploaded_file.name)
+            file_name = uploaded_file.name
+            file_path_in_data_dir = os.path.join(DATA_ROOT, file_name)
+
+            print(f"Attempting to save file to: {file_path_in_data_dir}")
 
             try:
-                # Ensure the data directory exists
                 os.makedirs(DATA_ROOT, exist_ok=True)
-                with open(file_path, "wb+") as destination:
+
+                with open(file_path_in_data_dir, "wb+") as destination:
                     for chunk in uploaded_file.chunks():
                         destination.write(chunk)
+                print("--- File saved successfully to disk ---")
 
-                # Now, create a DatasetConfig entry for this uploaded file
-                # For simplicity, features are left empty or you could add a step
-                # to parse the CSV header and suggest features.
-                # Here, we'll create a default empty feature list.
+                df = pd.read_csv(file_path_in_data_dir)
+                actual_columns = df.columns.tolist()
+                print(f"--- CSV parsed. Detected columns: {actual_columns} ---")
+
+                if not actual_columns:
+                    print("ERROR: CSV has no columns/headers.")
+                    form.add_error(
+                        "file",
+                        "업로드된 CSV 파일에 컬럼(헤더)이 없습니다. 유효한 CSV 파일인지 확인해주세요.",
+                    )
+                    return render(
+                        request, "mymlopsapp1/dataset_upload.html", {"form": form}
+                    )
+
+                auto_detected_target_column = actual_columns[-1]
+                print(
+                    f"--- Auto-detected target column: {auto_detected_target_column} ---"
+                )
+
+                # DatasetConfig 생성 또는 업데이트 시 features는 빈 리스트를 JSON 문자열로 변환하여 저장
                 dataset_config, created = DatasetConfig.objects.get_or_create(
                     name=dataset_name,
                     defaults={
-                        "file_path": uploaded_file.name,  # Store just the file name, assuming it's in DATA_ROOT
-                        "target_column": target_column,
-                        "features": [],  # User will need to define features later via FeatureConfig
+                        "file_path": file_name,
+                        "target_column": auto_detected_target_column,
+                        "features": json.dumps([]),
                         "description": description,
                     },
                 )
                 if not created:
-                    # If a DatasetConfig with this name already exists, update it
-                    dataset_config.file_path = uploaded_file.name
-                    dataset_config.target_column = target_column
+                    dataset_config.file_path = file_name
+                    dataset_config.target_column = auto_detected_target_column
                     dataset_config.description = description
+                    dataset_config.features = json.dumps([])
                     dataset_config.save()
 
-                # Redirect to the list of dataset configs or a success page
+                if created:
+                    print(
+                        f"--- DatasetConfig '{dataset_name}' CREATED successfully. ---"
+                    )
+                else:
+                    print(
+                        f"--- DatasetConfig '{dataset_name}' UPDATED successfully. ---"
+                    )
+
+                from django.contrib import messages
+
+                messages.success(
+                    request,
+                    f"데이터셋 '{dataset_name}'이(가) 성공적으로 업로드 및 설정되었습니다. (타겟 컬럼: '{auto_detected_target_column}')",
+                )
+                print("--- Redirecting to list_dataset_configs ---")
                 return redirect("mymlopsapp1:list_dataset_configs")
 
+            except pd.errors.EmptyDataError:
+                print("EXCEPTION CAUGHT: pandas.errors.EmptyDataError")
+                form.add_error("file", "업로드된 CSV 파일이 비어 있습니다.")
+            except pd.errors.ParserError:
+                print("EXCEPTION CAUGHT: pandas.errors.ParserError")
+                form.add_error(
+                    "file",
+                    "CSV 파일을 파싱하는 데 실패했습니다. 파일 형식을 확인해주세요.",
+                )
             except Exception as e:
-                # Handle file saving or DB creation errors
-                form.add_error(None, f"Error uploading file or saving config: {e}")
-                print(f"Error during upload: {e}")  # For debugging
+                print(f"EXCEPTION CAUGHT: General Error - {e}")
+                import traceback
 
-    else:
-        form = UploadFileForm()  # GET request, show empty form
+                traceback.print_exc()
+                form.add_error(None, f"파일 처리 중 알 수 없는 오류 발생: {e}")
 
+            print("--- Rendering form again due to error/exception ---")
+            return render(request, "mymlopsapp1/dataset_upload.html", {"form": form})
+
+        else:
+            print("--- Form is NOT VALID ---")
+            print("Form Errors:", form.errors)
+            return render(request, "mymlopsapp1/dataset_upload.html", {"form": form})
+
+    else:  # GET request
+        form = DatasetUploadAndConfigForm()
     return render(request, "mymlopsapp1/dataset_upload.html", {"form": form})
 
 
-# --- About 페이지 ---
-def about(request):
-    return HttpResponse("This is the about page of myMLOpsApp1.")
+# # --- About 페이지 ---
+# def about(request):
+#     return HttpResponse("This is the about page of myMLOpsApp1.")

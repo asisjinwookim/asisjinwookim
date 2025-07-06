@@ -1,25 +1,52 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - myMLOpsApp{% endblock %}
+{% block title %}홈{% endblock %} {# 페이지 제목 설정 #}
 
-{% block content %} {# 고유 콘텐츠를 content 블록 안에 넣습니다 #}
-    <h1>{{ message }}</h1>
-    <p>This is the home page of your MLOps application.</p>
-    <hr>
-    <h2>Configuration Management</h2>
-    <ul>
-        <li><a href="{% url 'mymlopsapp1:list_dataset_configs' %}">Manage Dataset Configurations</a></li>
-        <li><a href="{% url 'mymlopsapp1:create_dataset_config' %}">Create Dataset Configuration (Manual)</a></li>
-        <li><a href="{% url 'mymlopsapp1:dataset_upload' %}">Upload New Dataset File</a></li>
-        <li><a href="{% url 'mymlopsapp1:list_feature_configs' %}">Manage Feature Configurations</a></li>
-        <li><a href="{% url 'mymlopsapp1:create_feature_config' %}">Create Feature Configuration</a></li>
-        <li><a href="{% url 'mymlopsapp1:list_model_configs' %}">Manage Model Configurations</a></li>
-        <li><a href="{% url 'mymlopsapp1:create_model_config' %}">Create Model Configuration</a></li>
-    </ul>
-    <hr>
-    <h2>ML Operations</h2>
-    <ul>
-        <li><a href="{% url 'mymlopsapp1:train_model' %}">Train a New Model</a></li>
-        <li><a href="{% url 'mymlopsapp1:compare_results' %}">Compare Model Results</a></li>
-    </ul>
-{% endblock %}
+{% block content %} {# 페이지 고유 콘텐츠 시작 #}
+    <div class="jumbotron text-center bg-light p-4 rounded mb-5">
+        <h1 class="display-4">{{ message }}</h1>
+        <p class="lead">Django MLOps 애플리케이션에 오신 것을 환영합니다! 이 플랫폼을 통해 머신러닝 워크플로우를 간편하게 관리할 수 있습니다.</p>
+        <hr class="my-4">
+        <p>지금 바로 시작하여 데이터셋을 설정하고, 모델을 학습하며, 결과를 분석해 보세요.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'mymlopsapp1:train_model' %}" role="button">새 모델 학습 시작하기</a>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">데이터 관리</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">학습에 사용할 데이터셋을 업로드하고 관리합니다.</p>
+                    <a href="{% url 'mymlopsapp1:dataset_upload' %}" class="btn btn-sm btn-outline-info">데이터셋 업로드</a>
+                    <a href="{% url 'mymlopsapp1:list_dataset_configs' %}" class="btn btn-sm btn-outline-secondary ms-2">모든 데이터셋 보기</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">모델 및 피처 설정</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">다양한 피처 조합과 모델 파라미터를 정의합니다.</p>
+                    <a href="{% url 'mymlopsapp1:list_feature_configs' %}" class="btn btn-sm btn-outline-warning">피처 설정 관리</a>
+                    <a href="{% url 'mymlopsapp1:list_model_configs' %}" class="btn btn-sm btn-outline-secondary ms-2">모델 설정 관리</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">결과 분석</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">학습된 모델의 성능을 평가하고 비교합니다.</p>
+                    <a href="{% url 'mymlopsapp1:model_results' %}" class="btn btn-sm btn-outline-success">최근 학습 결과 보기</a>
+                    <a href="{% url 'mymlopsapp1:compare_results' %}" class="btn btn-sm btn-outline-secondary ms-2">결과 비교</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} {# 페이지 고유 콘텐츠 끝 #}
