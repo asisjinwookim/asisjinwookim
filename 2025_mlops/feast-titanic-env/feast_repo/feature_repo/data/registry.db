@@ -1,0 +1,30 @@
+
+c
+C
+passenger_idTitanic Passenger ID"passenger_idJfeast_project
+¾Œ®Ã¸õÔ–¾Œ®Ã¸õÔ–
+D
+$
+__dummy"
+__dummy_idJfeast_project
+¾Œ®Ã€ÒØ–¾Œ®Ã€ÒØ–1"$b9854572-3ac5-4a07-a008-16f50f04cbac*¨“®Ãà€ß¸2Ì
+«
+passenger_featuresfeast_projectpassenger_id"
+
+Pclass"
+Sex"
+Age"	
+SibSp"	
+Parch"
+Fare"
+Embarked"
+Survived"
+age_fare_ratio2€†°–:nevent_timestampZ./data/train.csvŠ1feast.infra.offline_stores.file_source.FileSource¢./data/train.csv@b
+passenger_id
+¾Œ®ÃÀ‡Ü–¨“®ÃÈ¼¤¸RÝ
+Ú
+,feast.infra.online_stores.sqlite.SqliteTable"©
+„/Users/jinwoo/Documents/github/asisjinwookim/asisjinwookim/2025_mlops/feast-titanic-env/feast_repo/feature_repo/data/online_store.db feast_project_passenger_featuresb~event_timestampZ./data/train.csvŠ1feast.infra.offline_stores.file_source.FileSource¢./data/train.csvªfeast_projectŠ/
+
+feast_project
+¾Œ®Ã¸â–‘¾Œ®Ã¸â–‘
