@@ -1,3 +1,4 @@
+{# mymlopsapp1/templates/mymlopsapp1/list_configs.html #}
 {% extends 'base.html' %}
 
 {% block title %}{{ config_type }} 구성 목록{% endblock %}
@@ -21,7 +22,8 @@
                             <th>파일 경로</th>
                             <th>타겟 컬럼</th>
                         {% elif config_type == 'Feature' %}
-                            <th>피처 목록</th>
+                            <th>데이터셋</th>
+                            <th>피처 목록</th> {# 이 부분을 수정합니다 #}
                         {% elif config_type == 'Model' %}
                             <th>데이터셋</th>
                             <th>피처 셋</th>
@@ -29,7 +31,6 @@
                             <th>파라미터</th>
                         {% endif %}
                         <th>설명</th>
-                        {# <th>생성일</th> #}
                     </tr>
                 </thead>
                 <tbody>
@@ -40,20 +41,36 @@
                                 <td>{{ config.file_path }}</td>
                                 <td>{{ config.target_column }}</td>
                             {% elif config_type == 'Feature' %}
+                                <td>{{ config.dataset_config.name }}</td>
                                 <td>
-                                    {# JSON 데이터는 alert 대신 모달 등으로 더 보기 좋게 만들 수 있음 #}
-                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('{{ config.features|escapejs }}')">보기</button>
+                                    {# JSON 문자열을 안전하게 JS로 전달하고 파싱하여 보기 좋게 표시 #}
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="try {
+                                                        var features = JSON.parse(document.getElementById('features_{{ config.id }}').textContent);
+                                                        alert(features.join('\\n'));
+                                                    } catch (e) {
+                                                        alert('JSON 파싱 오류: ' + e + '\\n원본 데이터: ' + document.getElementById('features_{{ config.id }}').textContent);
+                                                    }">보기</button>
+                                    {# data-id를 사용하여 고유한 ID를 부여 #}
+                                    <pre id="features_{{ config.id }}" style="display:none;">{{ config.features|escapejs }}</pre>
                                 </td>
                             {% elif config_type == 'Model' %}
                                 <td>{{ config.dataset_config.name }}</td>
                                 <td>{{ config.feature_config.name }}</td>
                                 <td>{{ config.model_type }}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('{{ config.parameters|escapejs }}')">보기</button>
+                                    {# ModelConfig.parameters도 TextField이므로 동일하게 JSON.parse 적용 #}
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="try {
+                                                        var params = JSON.parse(document.getElementById('params_{{ config.id }}').textContent);
+                                                        alert(JSON.stringify(params, null, 2));
+                                                    } catch (e) {
+                                                        alert('JSON 파싱 오류: ' + e + '\\n원본 데이터: ' + document.getElementById('params_{{ config.id }}').textContent);
+                                                    }">보기</button>
+                                    <pre id="params_{{ config.id }}" style="display:none;">{{ config.parameters|escapejs }}</pre>
                                 </td>
                             {% endif %}
                             <td>{{ config.description|default:"-" }}</td>
-                            {# <td>{{ config.created_at|date:"Y-m-d H:i" }}</td> #}
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -145,13 +145,25 @@ def list_dataset_configs_view(request):
 
 # --- FeatureConfig 생성 뷰 ---
 def create_feature_config_view(request):
+    # GET 요청 시 DatasetConfig ID를 쿼리 파라미터로 받을 수 있음 (선택 사항)
+    dataset_id = request.GET.get("dataset_id")
+
     if request.method == "POST":
-        form = FeatureConfigForm(request.POST)
+        # POST 요청 시에도 dataset_id를 폼 초기화에 넘겨줘야 합니다.
+        form = FeatureConfigForm(request.POST, dataset_id=request.POST.get("dataset"))
         if form.is_valid():
             form.save()
+            from django.contrib import messages
+
+            messages.success(
+                request,
+                f"피처 구성 '{form.cleaned_data['name']}'이(가) 성공적으로 생성되었습니다.",
+            )
             return redirect("mymlopsapp1:list_feature_configs")
     else:
-        form = FeatureConfigForm()
+        # GET 요청 시, 폼 초기화에 dataset_id를 넘겨서 해당 데이터셋의 컬럼을 미리 로드
+        form = FeatureConfigForm(dataset_id=dataset_id)
+
     return render(
         request,
         "mymlopsapp1/create_config.html",
@@ -523,13 +535,13 @@ def dataset_upload_view(request):
                     f"--- Auto-detected target column: {auto_detected_target_column} ---"
                 )
 
-                # DatasetConfig 생성 또는 업데이트 시 features는 빈 리스트를 JSON 문자열로 변환하여 저장
+                # DatasetConfig 생성 또는 업데이트
                 dataset_config, created = DatasetConfig.objects.get_or_create(
                     name=dataset_name,
                     defaults={
                         "file_path": file_name,
                         "target_column": auto_detected_target_column,
-                        "features": json.dumps([]),
+                        # 'features': json.dumps([]), # <--- 이 라인을 삭제하세요!
                         "description": description,
                     },
                 )
@@ -537,7 +549,7 @@ def dataset_upload_view(request):
                     dataset_config.file_path = file_name
                     dataset_config.target_column = auto_detected_target_column
                     dataset_config.description = description
-                    dataset_config.features = json.dumps([])
+                    # dataset_config.features = json.dumps([]) # <--- 이 라인도 삭제 (만약 있었다면)
                     dataset_config.save()
 
                 if created:

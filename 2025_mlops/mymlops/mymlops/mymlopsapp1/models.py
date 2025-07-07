@@ -12,20 +12,28 @@ class FeatureConfig(models.Model):
         unique=True,
         help_text="피처 설정의 고유 이름 (예: WineFeatures_All)",
     )
-    # JSONField -> TextField로 변경
+    # 어떤 DatasetConfig와 관련된 피처 구성인지 명시적으로 연결
+    dataset_config = models.ForeignKey(
+        "DatasetConfig",
+        on_delete=models.CASCADE,
+        related_name="feature_configs",
+        help_text="이 피처 조합이 적용될 데이터셋",
+    )
     features = models.TextField(
         help_text="학습에 사용할 피처 리스트 (JSON 배열 형식의 문자열)", default="[]"
-    )  # 기본값을 빈 JSON 배열 문자열로
+    )
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (Dataset: {self.dataset_config.name})"  # 출력 형식 변경
 
     class Meta:
         verbose_name = "피처 설정"
         verbose_name_plural = "피처 설정"
+        # 동일한 데이터셋에 대해 동일한 이름의 피처 구성을 만들 수 없도록 UniqueConstraint 추가
+        unique_together = ("name", "dataset_config")
 
 
 class DatasetConfig(models.Model):
