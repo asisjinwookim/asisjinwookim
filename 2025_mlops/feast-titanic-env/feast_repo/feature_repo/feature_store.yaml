@@ -1,6 +1,0 @@
-project: feast_project
-registry: data/registry.db
-provider: local
-online_store:
-    type: sqlite
-    path: data/online_store.db # 온라인 저장소 파일 경로
